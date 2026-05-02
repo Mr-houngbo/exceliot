@@ -11,7 +11,7 @@ app = Celery(
     "exceliot_workers",
     broker=redis_url,
     backend=redis_url,
-    include=['tasks.scrape_tasks', 'tasks.nlp_tasks']
+    include=['tasks.scrape_tasks', 'tasks.nlp_tasks', 'tasks.alerts']
 )
 
 # Configure Celery Beat schedule
@@ -23,6 +23,10 @@ app.conf.beat_schedule = {
     'score-jobs-every-15-mins': {
         'task': 'tasks.nlp_tasks.run_nlp_scoring',
         'schedule': crontab(minute='*/15'),
+    },
+    'daily-digest-8am': {
+        'task': 'tasks.alerts.send_daily_digest',
+        'schedule': crontab(minute=0, hour=8),
     },
 }
 app.conf.timezone = 'UTC'

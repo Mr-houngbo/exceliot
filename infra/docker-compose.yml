@@ -21,6 +21,15 @@ services:
     volumes:
       - ../apps/workers:/app
 
+  beat:
+    build: ../apps/workers
+    env_file: ../apps/workers/.env
+    depends_on:
+      - redis
+    command: celery -A celery_app beat --loglevel=info
+    volumes:
+      - ../apps/workers:/app
+
   redis:
     image: redis:7-alpine
     ports:
@@ -33,4 +42,6 @@ services:
     env_file: ../apps/web/.env.local
     volumes:
       - ../apps/web:/app
+      - /app/node_modules
+      - /app/.next
     command: npm run dev
