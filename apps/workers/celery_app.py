@@ -11,7 +11,7 @@ app = Celery(
     "exceliot_workers",
     broker=redis_url,
     backend=redis_url,
-    include=['tasks.scrape_tasks']
+    include=['tasks.scrape_tasks', 'tasks.nlp_tasks']
 )
 
 # Configure Celery Beat schedule
@@ -19,6 +19,10 @@ app.conf.beat_schedule = {
     'scrape-adzuna-every-6-hours': {
         'task': 'tasks.scrape_tasks.run_adzuna_scraper',
         'schedule': crontab(minute=0, hour='*/6'),
+    },
+    'score-jobs-every-15-mins': {
+        'task': 'tasks.nlp_tasks.run_nlp_scoring',
+        'schedule': crontab(minute='*/15'),
     },
 }
 app.conf.timezone = 'UTC'

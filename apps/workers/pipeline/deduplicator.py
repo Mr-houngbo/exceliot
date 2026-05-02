@@ -17,10 +17,15 @@ def deduplicate_jobs(clean_jobs: List[Dict[str, Any]]) -> Tuple[List[Dict[str, A
 
     urls = [job['url'] for job in clean_jobs if job.get('url')]
     
-    # Batch query existing URLs
-    existing_jobs_resp = supabase.table('jobs').select('url, external_id').in_('url', urls).execute()
-    existing_urls = {row['url']: row for row in existing_jobs_resp.data}
-    
+    # Batch query existing URLs in chunks to avoid 400 Bad Request (URL too long)
+    CHUNK_SIZE = 50
+    existing_urls = {}
+    for i in range(0, len(urls), CHUNK_SIZE):
+        chunk = urls[i:i + CHUNK_SIZE]
+        if chunk:
+            resp = supabase.table('jobs').select('url, external_id').in_('url', chunk).execute()
+            for row in resp.data:
+                existing_urls[row['url']] = row    
     # We could also fetch by fallback hash if needed, but the primary unique constraint is URL.
     # The user mentioned a fallback hash for cross-platform deduplication, which we can compute here 
     # and mark them as duplicate if we want, but for now we'll stick to URL for standard upserts.
