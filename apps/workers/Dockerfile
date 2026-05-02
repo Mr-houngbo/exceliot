@@ -1,5 +1,16 @@
 FROM python:3.11-slim
+
 WORKDIR /app
+
+# Dépendances système
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-# Code will be mounted via volume in docker-compose
+
+# Copie tout le dossier local vers /app
+COPY . .
+
+# Pas de CMD ici, Railway utilisera la commande Celery spécifiée dans son interface

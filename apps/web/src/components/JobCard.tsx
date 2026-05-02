@@ -17,13 +17,15 @@ interface Job {
   redirect_url: string;
 }
 
+const tierColorMapping: Record<string, string> = {
+  HIGH: 'bg-green-500',
+  MEDIUM: 'bg-yellow-500',
+  LOW: 'bg-blue-500',
+  SKIP: 'bg-gray-500',
+};
+
 export const JobCard: React.FC<{ job: Job }> = ({ job }) => {
-  const tierColor = {
-    HIGH: 'bg-green-500',
-    MEDIUM: 'bg-yellow-500',
-    LOW: 'bg-blue-500',
-    SKIP: 'bg-gray-500',
-  }[job.relevance_tier as keyof typeof tierColor] || 'bg-gray-500';
+  const tierColor = tierColorMapping[job.relevance_tier] || 'bg-gray-500';
 
   return (
     <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 transition-all hover:shadow-xl hover:-translate-y-1">
