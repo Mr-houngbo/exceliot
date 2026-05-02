@@ -1,24 +1,31 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
+  const router = useRouter()
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOtp({
+    setError(null)
+    
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+      password,
     })
     
     if (error) {
-      alert(error.message)
+      setError(error.message)
     } else {
-      setSent(true)
+      router.push('/admin')
+      router.refresh()
     }
     setLoading(false)
   }
@@ -33,51 +40,54 @@ export default function LoginPage() {
           <p className="text-zinc-500 text-sm mt-2">Espace Admin Cabinet</p>
         </div>
 
-        {sent ? (
-          <div className="text-center py-4">
-            <div className="w-16 h-16 bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-               </svg>
+        <form onSubmit={handleLogin} className="space-y-6">
+          {error && (
+            <div className="bg-red-900/20 border border-red-900/50 text-red-500 text-xs p-3 rounded-lg font-bold">
+              {error}
             </div>
-            <p className="text-white text-xl font-bold mb-2">Vérifiez votre email</p>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Un lien de connexion magique a été envoyé à <br/><span className="text-white font-medium">{email}</span>
-            </p>
-            <button 
-              onClick={() => setSent(false)}
-              className="mt-8 text-green-600 text-sm font-bold hover:underline"
-            >
-              Retour
-            </button>
+          )}
+
+          <div>
+            <label className="text-xs font-black uppercase text-zinc-500 mb-2 block tracking-wider">Email</label>
+            <input
+              type="email"
+              placeholder="votre@cabinet.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl
+                         px-4 py-4 text-white placeholder-zinc-600 focus:outline-none
+                         focus:ring-2 focus:ring-green-600/50 focus:border-green-600 transition-all"
+              required
+            />
           </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <label className="text-xs font-black uppercase text-zinc-500 mb-2 block tracking-wider">Adresse Email Professional</label>
-              <input
-                type="email"
-                placeholder="votre@cabinet.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl
-                           px-4 py-4 text-white placeholder-zinc-600 focus:outline-none
-                           focus:ring-2 focus:ring-green-600/50 focus:border-green-600 transition-all"
-              />
-            </div>
-            <button
-              onClick={handleLogin}
-              disabled={loading || !email}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50
-                         text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-green-600/20 active:scale-95"
-            >
-              {loading ? 'Envoi du lien...' : 'Se connecter'}
-            </button>
-            <p className="text-center text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
-              Accès réservé au personnel autorisé
-            </p>
+
+          <div>
+            <label className="text-xs font-black uppercase text-zinc-500 mb-2 block tracking-wider">Mot de passe</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl
+                         px-4 py-4 text-white placeholder-zinc-600 focus:outline-none
+                         focus:ring-2 focus:ring-green-600/50 focus:border-green-600 transition-all"
+              required
+            />
           </div>
-        )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50
+                       text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-green-600/20 active:scale-95"
+          >
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+
+          <p className="text-center text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
+            Accès sécurisé · Cabinet Exceliot
+          </p>
+        </form>
       </div>
     </div>
   )
