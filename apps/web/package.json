@@ -9,23 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "15.1.0",
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
     "lucide-react": "^0.456.0",
+    "next": "^16.2.4",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
     "recharts": "^2.13.3"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "next",
     "@types/node": "^20",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.0",
     "postcss": "^8",
     "tailwindcss": "next",
-    "@tailwindcss/postcss": "next",
-    "eslint": "^9",
-    "eslint-config-next": "15.1.0"
+    "typescript": "^5"
   }
 }
