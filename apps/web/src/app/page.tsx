@@ -16,14 +16,23 @@ export default function HomePage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        // Supprime le slash final s'il existe pour éviter le double //
+        if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1)
+        
         const response = await fetch(`${apiUrl}/api/v1/jobs/`)
-        if (!response.ok) throw new Error('Erreur lors de la récupération des offres')
+        if (!response.ok) throw new Error(`Erreur serveur: ${response.status}`)
+        
         const data = await response.json()
-        // Tri par score décroissant par défaut
-        const sortedData = data.sort((a: Job, b: Job) => b.relevance_score - a.relevance_score)
-        setJobs(sortedData)
-        setFilteredJobs(sortedData)
+        
+        // Sécurité : Vérifie que data est bien un tableau avant de trier
+        if (Array.isArray(data)) {
+          const sortedData = data.sort((a: Job, b: Job) => (b.relevance_score || 0) - (a.relevance_score || 0))
+          setJobs(sortedData)
+          setFilteredJobs(sortedData)
+        } else {
+          throw new Error('Format de données invalide')
+        }
       } catch (err: any) {
         setError(err.message)
       } finally {
