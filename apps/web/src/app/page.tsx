@@ -16,11 +16,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        // Supprime le slash final s'il existe pour éviter le double //
-        if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1)
-        
-        const response = await fetch(`${apiUrl}/api/v1/jobs`)
+        const response = await fetch('/api/jobs')
         if (!response.ok) throw new Error(`Erreur serveur: ${response.status}`)
         
         const data = await response.json()
