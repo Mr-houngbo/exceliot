@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin, Briefcase, Home, Clock, ChevronRight, Euro } from 'lucide-react';
 
 export interface Job {
   id: string;
@@ -20,122 +21,88 @@ export interface Job {
 }
 
 export const JobCard: React.FC<{ job: Job }> = ({ job }) => {
-  // Configuration des badges de score selon le tier
   const tierConfig = {
-    HIGH: { 
-      bg: 'bg-[#DCFCE7]', 
-      text: 'text-[#16A34A]', 
-      border: 'border-[#BBF7D0]', 
-      label: '🟢' 
-    },
-    MEDIUM: { 
-      bg: 'bg-[#FEF9C3]', 
-      text: 'text-[#CA8A04]', 
-      border: 'border-[#FDE68A]', 
-      label: '🟡' 
-    },
-    LOW: { 
-      bg: 'bg-[#FEE2E2]', 
-      text: 'text-[#DC2626]', 
-      border: 'border-[#FECACA]', 
-      label: '🔴' 
-    },
-    SKIP: { 
-      bg: 'bg-[#F5F5F4]', 
-      text: 'text-[#78716C]', 
-      border: 'border-[#E8E4DF]', 
-      label: '⚪' 
-    }
-  }[job.relevance_tier as keyof typeof tierConfig] || { 
-    bg: 'bg-zinc-100', 
-    text: 'text-zinc-500', 
-    border: 'border-zinc-200', 
-    label: '⚪' 
-  };
+    HIGH: { color: '#16A34A', bg: 'rgba(22, 163, 74, 0.08)', border: 'rgba(22, 163, 74, 0.2)' },
+    MEDIUM: { color: '#CA8A04', bg: 'rgba(202, 138, 4, 0.08)', border: 'rgba(202, 138, 4, 0.2)' },
+    LOW: { color: '#DC2626', bg: 'rgba(220, 38, 38, 0.08)', border: 'rgba(220, 38, 38, 0.2)' },
+    SKIP: { color: '#78716C', bg: 'rgba(120, 113, 108, 0.08)', border: 'rgba(120, 113, 108, 0.2)' }
+  }[job.relevance_tier as keyof typeof tierConfig] || { color: '#78716C', bg: '#f5f5f4', border: '#e8e4df' };
 
-  const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return "Salaire non communiqué";
-    if (min && max) return `${(min/1000).toFixed(0)}k – ${(max/1000).toFixed(0)}k €/an`;
-    return `${((min || max || 0)/1000).toFixed(0)}k €/an`;
-  };
-
-  const getTimeAgo = (dateStr?: string) => {
-    if (!dateStr) return "Récemment";
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    if (diffInHours < 1) return "À l'instant";
-    if (diffInHours < 24) return `Il y a ${diffInHours}h`;
-    return `Il y a ${Math.floor(diffInHours / 24)}j`;
+  const formatSalary = () => {
+    if (!job.salary_min && !job.salary_max) return "Salaire non communiqué";
+    if (job.salary_min && job.salary_max) return `${job.salary_min/1000}k – ${job.salary_max/1000}k €`;
+    return `${(job.salary_min || job.salary_max || 0)/1000}k €`;
   };
 
   return (
-    <div className="group bg-white border border-[#E8E4DF] rounded-[12px] p-5 transition-all hover:border-[#F97316] hover:shadow-[0_4px_20px_rgba(249,115,22,0.08)]">
+    <div className="glass-card rounded-2xl p-6 flex flex-col h-full group transition-all">
       
-      {/* Header : Titre & Score */}
-      <div className="flex justify-between items-start gap-4 mb-4">
-        <div className="flex gap-3">
-          <div className="w-10 h-10 bg-[#FAFAF9] border border-[#E8E4DF] rounded-lg flex items-center justify-center font-bold text-[#F97316] shrink-0">
+      {/* Header Section */}
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex gap-4">
+          <div className="w-12 h-12 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-xl font-black text-orange-500 shadow-inner group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
             {job.company.charAt(0)}
           </div>
-          <div>
-            <h3 className="text-[17px] font-bold text-[#1C1917] leading-tight group-hover:text-[#F97316] transition-colors line-clamp-1">
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-zinc-900 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
               {job.title}
             </h3>
-            <p className="text-[14px] text-[#78716C] font-medium mt-0.5">{job.company}</p>
+            <span className="text-sm font-semibold text-zinc-500">{job.company}</span>
           </div>
         </div>
         
-        <div className={`${tierConfig.bg} ${tierConfig.text} ${tierConfig.border} border px-2.5 py-1 rounded-full text-[13px] font-bold font-mono whitespace-nowrap`}>
-          {tierConfig.label} {job.relevance_score}
+        <div 
+          className="px-3 py-1.5 rounded-full border flex items-center gap-2 font-mono font-bold text-xs"
+          style={{ backgroundColor: tierConfig.bg, borderColor: tierConfig.border, color: tierConfig.color }}
+        >
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tierConfig.color }}></div>
+          {job.relevance_score}
         </div>
       </div>
 
-      {/* Metadata : Location, Contract, Remote */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4 text-[13px] text-[#78716C] font-medium">
-        <div className="flex items-center gap-1">📍 {job.location}</div>
-        <div className="text-[#E8E4DF]">•</div>
-        <div className="flex items-center gap-1">💼 {job.contract_type || "CDI"}</div>
-        <div className="text-[#E8E4DF]">•</div>
-        <div className="flex items-center gap-1">
-          {job.remote_policy === 'full_remote' ? '🏠 Remote' : job.remote_policy === 'hybrid' ? '🔄 Hybride' : '🏢 Sur site'}
+      {/* Metadata Grid */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <MapPin size={14} className="text-zinc-400" />
+          <span className="truncate">{job.location}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <Briefcase size={14} className="text-zinc-400" />
+          <span>{job.contract_type || "CDI"}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <Home size={14} className="text-zinc-400" />
+          <span>{job.remote_policy === 'full_remote' ? 'Remote' : 'Hybride'}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <Euro size={14} className="text-zinc-400" />
+          <span className="font-bold text-zinc-700">{formatSalary()}</span>
         </div>
       </div>
 
-      {/* Salary */}
-      <div className="mb-4 py-2 px-3 bg-[#FAFAF9] rounded-lg border border-[#E8E4DF]/50 text-[14px] font-bold text-[#1C1917]">
-        💰 {formatSalary(job.salary_min, job.salary_max)}
-      </div>
-
-      {/* Skills Tags */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {job.key_excel_skills?.slice(0, 4).map((skill, i) => (
-          <span 
-            key={i} 
-            className="bg-[#F5F5F4] text-[#44403C] px-2.5 py-1 rounded-[6px] text-[12px] font-medium border border-transparent hover:border-[#F97316]/30 hover:bg-[#FFF7ED] hover:text-[#EA580C] cursor-default"
-          >
+      {/* Skills / Tags */}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {job.key_excel_skills?.slice(0, 3).map((skill, i) => (
+          <span key={i} className="px-2.5 py-1 rounded-md bg-zinc-50 border border-zinc-100 text-[11px] font-bold text-zinc-600 uppercase tracking-tight">
             {skill}
           </span>
         ))}
-        {job.key_excel_skills && job.key_excel_skills.length > 4 && (
-          <span className="text-[11px] font-bold text-[#A8A29E] self-center">
-            +{job.key_excel_skills.length - 4}
-          </span>
-        )}
       </div>
 
-      {/* Footer : Date & Action */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#E8E4DF]">
-        <span className="text-[12px] text-[#A8A29E] font-medium italic">
-          {getTimeAgo(job.created_at)}
-        </span>
+      {/* Footer */}
+      <div className="mt-auto pt-5 border-t border-zinc-100 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[11px] font-medium">
+          <Clock size={12} />
+          {new Date(job.created_at || "").toLocaleDateString('fr-FR')}
+        </div>
         <a 
           href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-[#F97316] text-[14px] font-bold hover:bg-[#FFF7ED] px-4 py-2 rounded-[8px] flex items-center gap-1.5 transition-colors"
+          className="flex items-center gap-1 text-sm font-bold text-orange-500 hover:text-orange-700 transition-colors"
         >
-          Voir l'offre <span className="text-[16px]">→</span>
+          Voir l'offre
+          <ChevronRight size={16} />
         </a>
       </div>
 
