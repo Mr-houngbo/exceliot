@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "next": "15.0.3",
-    "react": "19.0.0-rc-66a32d36-20241107",
-    "react-dom": "19.0.0-rc-66a32d36-20241107",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
     "lucide-react": "^0.456.0",
@@ -20,8 +20,8 @@
   "devDependencies": {
     "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "19.0.0-rc-66855b96-20241106",
+    "@types/react-dom": "19.0.0-rc-66855b96-20241106",
     "postcss": "^8",
     "tailwindcss": "next",
     "@tailwindcss/postcss": "next",
