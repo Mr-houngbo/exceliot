@@ -20,14 +20,16 @@ export default function HomePage() {
         // Supprime le slash final s'il existe pour éviter le double //
         if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1)
         
-        const response = await fetch(`${apiUrl}/api/v1/jobs/`)
+        const response = await fetch(`${apiUrl}/api/v1/jobs`)
         if (!response.ok) throw new Error(`Erreur serveur: ${response.status}`)
         
         const data = await response.json()
         
-        // Sécurité : Vérifie que data est bien un tableau avant de trier
-        if (Array.isArray(data)) {
-          const sortedData = data.sort((a: Job, b: Job) => (b.relevance_score || 0) - (a.relevance_score || 0))
+        // Extraction des jobs depuis l'objet {"jobs": [...], "count": ...}
+        const jobsArray = data.jobs || data
+        
+        if (Array.isArray(jobsArray)) {
+          const sortedData = jobsArray.sort((a: Job, b: Job) => (b.relevance_score || 0) - (a.relevance_score || 0))
           setJobs(sortedData)
           setFilteredJobs(sortedData)
         } else {
