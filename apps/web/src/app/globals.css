@@ -1,30 +1,64 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #F97316;
+  --color-primary-hover: #EA580C;
+  --color-secondary: #22C55E;
+  --color-background: #FAFAF9;
+  --color-surface: #FFFFFF;
+  --color-border: #E8E4DF;
+  --color-text-dark: #1C1917;
+  --color-text-mid: #78716C;
+  --color-text-light: #A8A29E;
+  --color-danger: #EF4444;
+  --color-warning: #EAB308;
+  
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-soft: 0 4px 20px rgba(249, 115, 22, 0.08);
+}
+
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #f3f4f6;
-  }
+  --background: #FAFAF9;
+  --foreground: #1C1917;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-background);
+  color: var(--color-text-dark);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom Grid Pattern for Hero */
+.grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, #E8E4DF 1px, transparent 1px),
+    linear-gradient(to bottom, #E8E4DF 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+  opacity: 0.2;
+}
+
+/* Smooth Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 ::selection {
-  background-color: #10b981;
-  color: white;
+  background-color: #FED7AA;
+  color: #1C1917;
 }

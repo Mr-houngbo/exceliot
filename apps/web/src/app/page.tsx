@@ -1,124 +1,250 @@
-'use client';
+'use client'
+import { useEffect, useState } from 'react'
+import { JobCard, Job } from '@/components/JobCard'
+import { Search, Zap, TrendingUp, Clock, AlertCircle } from 'lucide-react'
 
-import React, { useEffect, useState } from 'react';
-import { JobCard } from '@/components/JobCard';
+export default function HomePage() {
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('ALL')
 
-export default function Home() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState('');
-
+  // 1. Fetch des données réelles
   useEffect(() => {
-    fetchJobs();
-  }, [tier]);
-
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const url = new URL('http://localhost:8000/api/v1/jobs/');
-      if (tier) url.searchParams.append('tier', tier);
-      
-      const res = await fetch(url.toString());
-      const data = await res.json();
-      setJobs(data.jobs || []);
-    } catch (err) {
-      console.error("Failed to fetch jobs:", err);
-    } finally {
-      setLoading(false);
+    const fetchJobs = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiUrl}/api/v1/jobs/`)
+        if (!response.ok) throw new Error('Erreur lors de la récupération des offres')
+        const data = await response.json()
+        // Tri par score décroissant par défaut
+        const sortedData = data.sort((a: Job, b: Job) => b.relevance_score - a.relevance_score)
+        setJobs(sortedData)
+        setFilteredJobs(sortedData)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
     }
-  };
+    fetchJobs()
+  }, [])
+
+  // 2. Logique de filtrage et recherche (Client-side pour réactivité max)
+  useEffect(() => {
+    let result = [...jobs]
+
+    if (filter !== 'ALL') {
+      if (filter === 'REMOTE') {
+        result = result.filter(j => j.remote_policy === 'full_remote')
+      } else {
+        result = result.filter(j => j.relevance_tier === filter)
+      }
+    }
+
+    if (search) {
+      const q = search.toLowerCase()
+      result = result.filter(j => 
+        j.title.toLowerCase().includes(q) || 
+        j.company.toLowerCase().includes(q) ||
+        j.key_excel_skills?.some(s => s.toLowerCase().includes(q))
+      )
+    }
+
+    setFilteredJobs(result)
+  }, [search, filter, jobs])
+
+  const stats = {
+    total: jobs.length,
+    high: jobs.filter(j => j.relevance_tier === 'HIGH').length,
+    lastUpdate: '6h'
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans">
-      {/* Header / Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-black">X</div>
-              <span className="text-xl font-black tracking-tight uppercase">Excel<span className="text-green-600">iot</span></span>
+    <div className="min-h-screen bg-[#FAFAF9] flex flex-col">
+      
+      {/* ─── NAVBAR ─── */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E8E4DF]">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <div className="text-2xl font-black tracking-tighter text-[#1C1917] font-display">
+              EXCEL<span className="text-[#F97316]">I</span>OT
             </div>
-            <div className="hidden md:flex gap-6 items-center">
-              <a href="#" className="text-sm font-medium hover:text-green-600 transition-colors">Offres</a>
-              <a href="#" className="text-sm font-medium hover:text-green-600 transition-colors">Entreprises</a>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-green-700 transition-all">
-                Publier une offre
-              </button>
+            <div className="hidden md:flex items-center gap-6 text-[14px] font-medium text-[#78716C]">
+              <a href="#" className="text-[#1C1917] hover:text-[#F97316]">Offres</a>
+              <a href="#" className="hover:text-[#F97316]">Marché</a>
+              <a href="#" className="hover:text-[#F97316]">À propos</a>
             </div>
           </div>
+          <a href="/login" className="bg-[#F97316] text-white px-5 py-2 rounded-lg font-bold text-[14px] hover:bg-[#EA580C] shadow-sm active:scale-95 transition-all">
+            Connexion Admin
+          </a>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <header className="py-20 px-4 bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-black">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-500">
-            Trouvez les meilleures opportunités <span className="text-green-600">Excel</span>.
+      {/* ─── HERO SECTION ─── */}
+      <section className="relative pt-20 pb-24 overflow-hidden border-b border-[#E8E4DF]">
+        <div className="absolute inset-0 grid-pattern pointer-events-none"></div>
+        
+        <div className="relative z-10 max-w-[1200px] mx-auto px-6 text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#1C1917] tracking-tight leading-[1.1] mb-6 font-display">
+            Trouvez les offres <span className="relative inline-block">
+              Excel
+              <span className="absolute -bottom-2 left-0 w-full h-1.5 bg-[#F97316]/20 rounded-full"></span>
+            </span> <br className="hidden md:block" />
+            que les autres ne voient pas.
           </h1>
-          <p className="text-lg md:text-xl text-zinc-500 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">
-            Nous analysons des milliers d'offres chaque jour pour extraire les jobs "cachés" nécessitant une expertise avancée sur Excel et VBA.
+          <p className="text-[18px] md:text-[20px] text-[#78716C] max-w-2xl mx-auto mb-12">
+            Notre IA analyse et score chaque offre pour ne vous montrer <br className="hidden md:block" /> que ce qui compte vraiment pour votre carrière.
           </p>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar / Filters */}
-          <aside className="w-full md:w-64 flex-shrink-0">
-            <div className="sticky top-24 p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold mb-6">Filtres</h2>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="text-xs font-black uppercase text-zinc-400 dark:text-zinc-500 mb-3 block">Niveau de Pertinence</label>
-                  <div className="flex flex-col gap-2">
-                    {['', 'HIGH', 'MEDIUM', 'LOW'].map((t) => (
-                      <button 
-                        key={t}
-                        onClick={() => setTier(t)}
-                        className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                          tier === t 
-                          ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' 
-                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                        }`}
-                      >
-                        {t || 'Tous les jobs'}
-                      </button>
-                    ))}
-                  </div>
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="bg-white border-2 border-[#E8E4DF] rounded-2xl p-1.5 flex items-center shadow-sm focus-within:border-[#F97316] focus-within:ring-4 focus-within:ring-orange-50 transition-all">
+              <div className="pl-4 text-[#F97316]">
+                <Search size={22} />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Rechercher VBA, Power Query, modélisation..."
+                className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 text-[16px] text-[#1C1917] placeholder-[#A8A29E]"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            <div className="bg-[#FFF7ED] border border-[#FED7AA] text-[#EA580C] px-3.5 py-1.5 rounded-full text-[13px] font-bold flex items-center gap-2">
+              <TrendingUp size={14} /> {stats.total} offres analysées
+            </div>
+            <div className="bg-green-50 border border-green-200 text-green-700 px-3.5 py-1.5 rounded-full text-[13px] font-bold flex items-center gap-2">
+              <Zap size={14} /> {stats.high} HIGH relevance
+            </div>
+            <div className="bg-zinc-50 border border-zinc-200 text-zinc-600 px-3.5 py-1.5 rounded-full text-[13px] font-bold flex items-center gap-2">
+              <Clock size={14} /> Mis à jour toutes les {stats.lastUpdate}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CONTENT AREA ─── */}
+      <main className="flex-1 max-w-[1200px] mx-auto px-6 w-full py-12">
+        
+        {/* Filters Bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: 'ALL', label: 'Tous' },
+              { id: 'HIGH', label: '🟢 HIGH Relevance' },
+              { id: 'MEDIUM', label: '🟡 Medium' },
+              { id: 'LOW', label: '🔴 Low' },
+              { id: 'REMOTE', label: '🏠 Full Remote' }
+            ].map((f) => (
+              <button 
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
+                  filter === f.id 
+                    ? 'bg-[#FFF7ED] border-[#F97316] text-[#F97316]' 
+                    : 'bg-[#F5F5F4] border-transparent text-[#78716C] hover:bg-[#E8E4DF]'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="text-[13px] font-bold text-[#A8A29E] uppercase tracking-widest">
+            {filteredJobs.length} offres disponibles
+          </div>
+        </div>
+
+        {/* State Handling */}
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-12 text-center">
+             <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+             <h3 className="text-red-900 font-bold text-lg mb-2">Erreur de connexion</h3>
+             <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        ) : loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white border border-[#E8E4DF] rounded-[12px] p-5 h-[320px] animate-pulse">
+                <div className="w-10 h-10 bg-[#F5F5F4] rounded-lg mb-4"></div>
+                <div className="h-4 bg-[#F5F5F4] rounded w-3/4 mb-4"></div>
+                <div className="h-3 bg-[#F5F5F4] rounded w-1/2 mb-8"></div>
+                <div className="space-y-3">
+                  <div className="h-3 bg-[#F5F5F4] rounded w-full"></div>
+                  <div className="h-3 bg-[#F5F5F4] rounded w-5/6"></div>
                 </div>
               </div>
-            </div>
-          </aside>
+            ))}
+          </div>
+        ) : filteredJobs.length === 0 ? (
+          <div className="bg-white border border-[#E8E4DF] rounded-2xl p-20 text-center">
+             <Search className="mx-auto text-[#A8A29E] mb-4 opacity-20" size={64} />
+             <h3 className="text-[#1C1917] font-bold text-xl mb-2">Aucune offre trouvée</h3>
+             <p className="text-[#78716C] text-sm mb-8">Essayez de modifier vos filtres ou votre recherche.</p>
+             <button 
+              onClick={() => {setFilter('ALL'); setSearch('')}}
+              className="text-[#F97316] font-bold text-sm border-b-2 border-[#F97316]"
+             >
+               Réinitialiser les filtres
+             </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredJobs.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))}
+          </div>
+        )}
 
-          {/* Job Feed */}
-          <section className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">{jobs.length} opportunités trouvées</h2>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-64 bg-zinc-200 dark:bg-zinc-800 rounded-2xl animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {jobs.map((job: any) => (
-                  <JobCard key={job.id} job={job} />
-                ))}
-                {jobs.length === 0 && (
-                  <div className="col-span-full py-20 text-center text-zinc-500">
-                    Aucune offre ne correspond à vos critères.
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
-        </div>
       </main>
+
+      {/* ─── FOOTER ─── */}
+      <footer className="bg-[#1C1917] text-white pt-16 pb-8">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between gap-12 mb-12">
+            <div className="max-w-xs">
+              <div className="text-2xl font-black tracking-tighter text-white mb-4">
+                EXCEL<span className="text-[#F97316]">I</span>OT
+              </div>
+              <p className="text-[#A8A29E] text-[14px] leading-relaxed">
+                La plateforme n°1 d'intelligence emploi spécialisée Excel. Propulsé par une IA de scoring de pointe.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+              <div>
+                <h4 className="text-[14px] font-black uppercase tracking-widest mb-6">Plateforme</h4>
+                <ul className="space-y-3 text-[14px] text-[#A8A29E]">
+                  <li><a href="#" className="hover:text-white transition-colors">Offres Excel</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Analyses Marché</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Alertes Email</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-[14px] font-black uppercase tracking-widest mb-6">Légal</h4>
+                <ul className="space-y-3 text-[14px] text-[#A8A29E]">
+                  <li><a href="#" className="hover:text-white transition-colors">Confidentialité</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Se désabonner</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-zinc-500 font-medium">
+            <div>© 2026 ExcelIoT Intelligence. Tous droits réservés.</div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              Propulsé par l'IA · Mis à jour toutes les 6h
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
-  );
+  )
 }
