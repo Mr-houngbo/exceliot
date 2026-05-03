@@ -40,11 +40,11 @@ export const JobCard: React.FC<{ job: Job }> = ({ job }) => {
       {/* Header Section */}
       <div className="flex justify-between items-start mb-6">
         <div className="flex gap-4">
-          <div className="w-12 h-12 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-xl font-black text-orange-500 shadow-inner group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+          <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl font-black text-primary shadow-inner group-hover:bg-primary group-hover:text-white transition-all duration-300">
             {job.company.charAt(0)}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-zinc-900 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
+            <h3 className="text-lg font-bold text-zinc-900 leading-snug group-hover:text-primary transition-colors line-clamp-2">
               {job.title}
             </h3>
             <span className="text-sm font-semibold text-zinc-500">{job.company}</span>
@@ -99,7 +99,7 @@ export const JobCard: React.FC<{ job: Job }> = ({ job }) => {
           href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-sm font-bold text-orange-500 hover:text-orange-700 transition-colors"
+          className="flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
         >
           Voir l'offre
           <ChevronRight size={16} />

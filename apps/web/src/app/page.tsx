@@ -69,18 +69,18 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-10">
             <div className="text-xl font-black tracking-tighter text-zinc-900 flex items-center gap-2">
-              <div className="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center text-[12px] text-white">X</div>
+              <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center text-[12px] text-white">X</div>
               EXCELIOT
             </div>
             <div className="hidden md:flex items-center gap-6 text-sm font-bold text-zinc-500">
               <a href="#" className="text-zinc-900">Explorer</a>
-              <a href="#" className="hover:text-zinc-900 transition-colors">Analyses</a>
-              <a href="#" className="hover:text-zinc-900 transition-colors">Alertes</a>
+              <a href="#" className="hover:text-primary transition-colors">Analyses</a>
+              <a href="#" className="hover:text-primary transition-colors">Alertes</a>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <a href="/login" className="text-sm font-bold text-zinc-500 hover:text-zinc-900 px-4 py-2">Connexion</a>
-            <button className="btn-primary px-5 py-2 text-sm shadow-orange-200">Essai Gratuit</button>
+            <button className="btn-primary px-5 py-2 text-sm shadow-green-200">Essai Gratuit</button>
           </div>
         </div>
       </nav>
@@ -90,7 +90,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-grid pointer-events-none"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-[11px] font-black uppercase tracking-wider mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-100 text-primary text-[11px] font-black uppercase tracking-wider mb-8">
             <Zap size={12} fill="currentColor" />
             Intelligence Emploi 2.0
           </div>
@@ -102,18 +102,18 @@ export default function HomePage() {
 
           {/* Linear-Style Search */}
           <div className="max-w-2xl mx-auto relative group mt-12">
-            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-orange-500 transition-colors">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-primary transition-colors">
               <Search size={20} />
             </div>
             <input 
               type="text" 
               placeholder="Rechercher VBA, Power Query, Analyste..."
-              className="w-full bg-white border border-zinc-200 rounded-2xl py-5 pl-14 pr-24 text-lg font-medium shadow-sm focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all"
+              className="w-full bg-white border border-zinc-200 rounded-2xl py-5 pl-14 pr-24 text-lg font-medium shadow-sm focus:ring-4 focus:ring-green-500/5 focus:border-primary outline-none transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             <div className="absolute right-4 inset-y-0 flex items-center gap-2">
-               <button onClick={handleRefresh} className="p-2 text-zinc-400 hover:text-orange-500 transition-colors">
+               <button onClick={handleRefresh} className="p-2 text-zinc-400 hover:text-primary transition-colors">
                   <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
                </button>
                <div className="hidden md:flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-1 rounded-md text-[10px] font-bold text-zinc-400">
