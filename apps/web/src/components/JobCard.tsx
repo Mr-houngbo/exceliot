@@ -14,7 +14,7 @@ export interface Job {
   excel_level: string;
   sector: string;
   key_excel_skills: string[];
-  redirect_url: string;
+  url: string;
   contract_type?: string;
   created_at?: string;
 }
@@ -130,7 +130,7 @@ export const JobCard: React.FC<{ job: Job }> = ({ job }) => {
           {getTimeAgo(job.created_at)}
         </span>
         <a 
-          href={job.redirect_url} 
+          href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
           className="text-[#F97316] text-[14px] font-bold hover:bg-[#FFF7ED] px-4 py-2 rounded-[8px] flex items-center gap-1.5 transition-colors"

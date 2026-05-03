@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { JobCard, Job } from '@/components/JobCard'
-import { Search, Zap, TrendingUp, Clock, AlertCircle } from 'lucide-react'
+import { Search, Zap, TrendingUp, Clock, AlertCircle, RefreshCw } from 'lucide-react'
 
 export default function HomePage() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -13,30 +13,36 @@ export default function HomePage() {
   const [filter, setFilter] = useState('ALL')
 
   // 1. Fetch des données réelles
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch('/api/jobs')
-        if (!response.ok) throw new Error(`Erreur serveur: ${response.status}`)
-        
-        const data = await response.json()
-        
-        // Extraction des jobs depuis l'objet {"jobs": [...], "count": ...}
-        const jobsArray = data.jobs || data
-        
-        if (Array.isArray(jobsArray)) {
-          const sortedData = jobsArray.sort((a: Job, b: Job) => (b.relevance_score || 0) - (a.relevance_score || 0))
-          setJobs(sortedData)
-          setFilteredJobs(sortedData)
-        } else {
-          throw new Error('Format de données invalide')
-        }
-      } catch (err: any) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const fetchJobs = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/jobs')
+      if (!response.ok) throw new Error(`Erreur serveur: ${response.status}`)
+      const data = await response.json()
+      const jobsArray = data.jobs || data
+      if (Array.isArray(jobsArray)) {
+        const sortedData = jobsArray.sort((a: Job, b: Job) => (b.relevance_score || 0) - (a.relevance_score || 0))
+        setJobs(sortedData)
+      } else {
+        throw new Error('Format de données invalide')
       }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await fetchJobs()
+    setTimeout(() => setIsRefreshing(false), 500)
+  }
+
+  useEffect(() => {
     fetchJobs()
   }, [])
 
@@ -120,6 +126,14 @@ export default function HomePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+              <button 
+                onClick={handleRefresh}
+                disabled={loading}
+                className="p-3 text-[#78716C] hover:text-[#F97316] transition-colors disabled:opacity-50"
+                title="Actualiser les offres"
+              >
+                <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
+              </button>
             </div>
           </div>
 
