@@ -107,7 +107,7 @@ def calculate_keyword_score(title: str, description: str) -> int:
     
     return min(score, 50)
 
-def score_job(title: str, description: str) -> Dict[str, Any]:
+def score_job(title: str, description: str, location: str = "") -> Dict[str, Any]:
     """
     Calculates score and extracts data. 
     Uses Local NLP by default, can use Gemini if quota allows.
@@ -125,9 +125,14 @@ def score_job(title: str, description: str) -> Dict[str, Any]:
     if extracted_data.excel_level in ["advanced", "expert"]: bonus_score += 3
     if "mos" in str(description).lower(): bonus_score += 7
     
+    # --- REGIONAL BONUS ---
+    # Give a boost to jobs from user's target regions (CI/SN)
+    # This ensures they show up as MEDIUM even if "excel" is not in title/desc
+    loc_lower = str(location).lower()
+    if any(k in loc_lower for k in ["senegal", "dakar", "ivoire", "abidjan"]):
+        bonus_score += 30 # Heavy boost for regional relevance
+
     # 4. Semantic Score (Mocked if AI fails)
-    # Since we can't reliably use embeddings for free without quota issues, 
-    # we simulate the semantic score by looking for "Expert" signals.
     semantic_score = 0
     if extracted_data.excel_level == "expert": semantic_score = 25
     elif extracted_data.excel_level == "advanced": semantic_score = 15

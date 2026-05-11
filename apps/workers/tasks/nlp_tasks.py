@@ -22,7 +22,7 @@ def run_nlp_scoring():
     try:
         # 2. Fetch unscored jobs
         print("Fetching unscored jobs...")
-        jobs_resp = supabase.table('jobs').select('id, title, description, salary_min, salary_max').is_('nlp_extracted_at', 'null').limit(20).execute()
+        jobs_resp = supabase.table('jobs').select('id, title, description, location, salary_min, salary_max').is_('nlp_extracted_at', 'null').limit(20).execute()
         jobs_to_score = jobs_resp.data
         
         if not jobs_to_score:
@@ -43,7 +43,7 @@ def run_nlp_scoring():
         # 3. Score each job and update
         for job in jobs_to_score:
             try:
-                score_result = score_job(job['title'], job['description'])
+                score_result = score_job(job['title'], job['description'], job.get('location', ''))
                 
                 # Update job
                 update_data = {

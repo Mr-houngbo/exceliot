@@ -23,9 +23,9 @@ def clean_generic_job(scraped_job: dict, source_id: str) -> dict:
     # Heuristic for default location if empty
     if not location:
         if ".sn" in url or "senjob" in url:
-            location = "Sénégal"
+            location = "Senegal"
         elif ".ci" in url or "educarriere" in url or "emploi.ci" in url:
-            location = "Côte d'Ivoire"
+            location = "Cote d'Ivoire"
         else:
             location = "Afrique" # Default fallback for regional sources
 
