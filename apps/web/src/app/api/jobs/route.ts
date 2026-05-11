@@ -5,13 +5,17 @@ export async function GET() {
   try {
     const supabase = await createClient()
     
+    const fifteenDaysAgo = new Date()
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15)
+
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
       .eq('is_active', true)
       .eq('is_duplicate', false)
+      .gt('created_at', fifteenDaysAgo.toISOString())
       .order('relevance_score', { ascending: false })
-      .limit(100)
+      .limit(500)
 
     if (error) throw error
 

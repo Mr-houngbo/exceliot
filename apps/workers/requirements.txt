@@ -5,3 +5,7 @@ supabase
 httpx
 google-genai
 resend
+playwright
+beautifulsoup4
+pydantic
+pydantic-settings

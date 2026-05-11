@@ -11,11 +11,15 @@ app = Celery(
     "exceliot_workers",
     broker=redis_url,
     backend=redis_url,
-    include=['tasks.scrape_tasks', 'tasks.nlp_tasks', 'tasks.alerts']
+    include=['tasks.scrape_tasks', 'tasks.nlp_tasks', 'tasks.alerts', 'tasks.maintenance']
 )
 
 # Configure Celery Beat schedule
 app.conf.beat_schedule = {
+    'maintenance-every-12-hours': {
+        'task': 'tasks.maintenance.run_cleanup_task',
+        'schedule': crontab(minute=0, hour='*/12'),
+    },
     'scrape-adzuna-every-6-hours': {
         'task': 'tasks.scrape_tasks.run_adzuna_scraper',
         'schedule': crontab(minute=0, hour='*/6'),

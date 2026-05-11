@@ -1,0 +1,11 @@
+{
+  "name": "exceliot-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "web:install": "cd apps/web && npm install",
+    "web:dev": "cd apps/web && npm run dev",
+    "infra:up": "cd infra && docker-compose up -d --build",
+    "infra:down": "cd infra && docker-compose down"
+  }
+}

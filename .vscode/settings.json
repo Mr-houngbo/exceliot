@@ -1,0 +1,10 @@
+{
+    "python.analysis.extraPaths": [
+        "./apps/workers",
+        "./apps/api"
+    ],
+    "python.autoComplete.extraPaths": [
+        "./apps/workers",
+        "./apps/api"
+    ]
+}

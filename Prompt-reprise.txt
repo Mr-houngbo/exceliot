@@ -1,0 +1,37 @@
+Ran command: `python -c "import pandas as pd; df = pd.read_excel('e:/exceliot/data/sites-ivory-coast.xlsx'); print('Ivory Coast Columns:', df.columns.tolist()); print(df.head())"`
+Ran command: `python -c "import pandas as pd; df = pd.read_excel('e:/exceliot/data/sites-senegal.xlsx'); print('Senegal Columns:', df.columns.tolist()); print(df.head())"`
+
+L'analyse des fichiers Excel montre une grande diversité de sources : des job boards classiques (Educarriere, ecademi), des agrégateurs mondiaux via Google (Indeed, beBee) et même des réseaux sociaux (Facebook, X).
+
+Voici mon plan d'action pour transformer ces listes en un pipeline de scraping industriel.
+
+### 📋 Plan d'Action : Scraping Pipeline 2.0
+
+#### 1. Consolidation des Sources (Import & Data Entry)
+*   **Action** : Créer un script d'importation (`import_sources.py`) pour lire les fichiers Excel et peupler la table `sources` de Supabase.
+*   **Métadonnées** : Ajouter des champs comme `country` (CI/SN), `source_type` (direct/aggregator/social) et `scraping_method` (api/html/manual).
+*   **Priorisation** : Marquer les sources comme `active` ou `pending` selon leur facilité technique.
+
+#### 2. Architecture Modulaire des Scrapers
+Je propose de structurer les scrapers en trois catégories dans `apps/workers/scrapers/` :
+*   **`engine_adzuna.py`** (Existant) : Utilisation d'API.
+*   **`engine_generic_html.py`** : Un scraper flexible qui utilise des sélecteurs CSS (stockés en DB) pour extraire les données des sites simples (ex: Educarriere).
+*   **`engine_headless.py`** : Utilisation de **Playwright** pour les sites complexes qui nécessitent du rendu JavaScript.
+
+#### 3. Workflow d'Orchestration (Celery)
+*   **Tâche `dispatch_scrapers`** : Une tâche maître qui récupère toutes les sources actives et lance une sous-tâche pour chacune.
+*   **Rate Limiting** : Configurer Celery pour ne pas saturer les sites cibles et éviter les bans IP (utilisation de proxies si nécessaire).
+
+#### 4. Raffinement du Pipeline de Nettoyage
+*   **Dédoublonnage Trans-Sources** : Améliorer `deduplicator.py` pour identifier qu'une offre sur Indeed est la même que sur Educarriere.
+*   **Standardisation** : Mapper tous les formats de date et de salaire disparates vers le format Supabase.
+
+---
+
+### 🔥 Prochaines Étapes Immédiates
+
+1.  **Créer le script d'importation** pour injecter les ~50 nouvelles sources dans la base.
+2.  **Développer le `GenericHTMLScraper`** : C'est le plus rentable. On définit `title_selector`, `company_selector` en base de données, et le script fait le reste.
+3.  **Test sur Educarriere.ci** : C'est la source n°1 en Côte d'Ivoire, idéale pour valider le modèle.
+
+**Es-tu d'accord avec ce plan ? Si oui, je commence par créer le script d'importation pour préparer la base de données.**
